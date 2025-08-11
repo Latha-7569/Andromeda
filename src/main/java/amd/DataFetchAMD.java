@@ -300,12 +300,10 @@ public class DataFetchAMD {
 		}
 	}
 	
-	
+	/* Custom class exceptions */
 	
 	public class ObjectIdNotFoundException extends RuntimeException {
-		/**
-		 * 
-		 */
+		
 		private static final long serialVersionUID = 1L;
 
 		public ObjectIdNotFoundException(String message) {
