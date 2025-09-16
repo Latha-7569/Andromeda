@@ -1,0 +1,52 @@
+public void createObject(Map datamap) {
+		String screateobject="INSERT INTO Amxpartcontroldata (objectId,type ,name,description,createddate,owner,email,supertype,assignee,connectionid,currentstate)"
+				+ "VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+		try {
+			Connection conn=DriverManager.getConnection(URL,USERNAME,PASSWORD);
+			PreparedStatement pstmt=conn.prepareStatement(screateobject);
+			pstmt.setString(1, (String) datamap.get("objectid"));
+
+
+			//To Store the object id in variable 
+			String sTempObjId = (String) datamap.get("objectid");
+			if (!sTempObjId.isEmpty()) {
+				sNewTempObjectId = sTempObjId;
+			}
+
+
+			pstmt.setString(2, (String) datamap.get("type"));
+			pstmt.setString(3, (String) datamap.get("name"));
+			pstmt.setString(4, (String) datamap.get("description"));
+			pstmt.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+			pstmt.setString(6,(String) datamap.get("owner") );
+			pstmt.setString(7,(String) datamap.get("email") );
+			pstmt.setString(8,(String) datamap.get("supertype") );
+			pstmt.setString(9, (String) datamap.get("assignee"));
+			pstmt.setString(10, (String) datamap.get("connectionid"));
+			pstmt.setString(11, (String) datamap.get("currentstate"));
+			int rowinserted=pstmt.executeUpdate();
+			public static void main(String[] args) {
+		
+		String createquery="CREATE TABLE  IF NOT EXISTS Amxpartcontroldata ("
+				+ "objectid VARCHAR(100)PRIMARY KEY,"
+				+"type VARCHAR(100),"
+				+"name VARCHAR(100),"
+				+"description VARCHAR(100),"
+				+"createddate TIMESTAMP,"
+
+
+			+"owner VARCHAR(100),"
+			+"email VARCHAR(100),"
+			+"supertype VARCHAR(100),"
+			+"assignee VARCHAR(100),"
+			+"connectionid VARCHAR(100),"
+			+ "currentstate VARCHAR(100)"
+			+")";
+		try {
+			Connection conn=DriverManager.getConnection(URL,USERNAME,PASSWORD);
+			PreparedStatement pstmt=conn.prepareStatement(createquery);
+			pstmt.executeUpdate();	 
+		}catch(Exception e) {
+			e.printStackTrace();
+			e.getMessage();	
+		}
