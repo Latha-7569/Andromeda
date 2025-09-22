@@ -1,0 +1,67 @@
+# fastenerscoredata table
+
+CREATE TABLE IF NOT EXISTS fastenerscoredata (id SERIAL PRIMARY KEY,fastnertype VARCHAR(100),fastnersubtype VARCHAR(2000),
+                apn VARCHAR(100),variant VARCHAR(100),type_id INT);
+SELECT * FROM public.fastenerscoredata;
+
+INSERT INTO fastenerscoredata (fastnertype, fastnersubtype, apn, variant,type_id)
+VALUES
+('Bolts', 'Hex Head-Bolts, Carriage-Bolts, U-Bolts, Flange-Bolts, Shoulder-Bolts, Locking Bolts, Wheel Lug Bolts, Studs', '100', 'Small,Medium,Large',8),
+
+-- 2. Nuts
+('Nuts', 'Hex Nuts, Lock Nuts (Nylon Insert, Serrated, etc.), Wing Nuts, Acorn Nuts (Cap Nuts), T-Nuts, Castle Nuts, Push Nuts', '101', 'Small,Medium,Large',8),
+
+-- 3. Screws
+('Screws', 'Machine Screws, Self-Tapping Screws, Wood Screws, Sheet Metal Screws, Torx Screws, Security Screws (Pentalobe, Torx Plus, Clutch Head), Set Screws, Thumb Screws', '102','Small,Medium,Large',8),
+
+-- 4. Rivets
+('Rivets', 'Pop Rivets, Solid Rivets, Blind Rivets, Monobolt Rivets, Flush Rivets', '103', 'Small,Medium,Large',8),
+
+-- 5. Washers
+('Washers', 'Flat Washers, Lock Washers (Split, External Tooth, Internal Tooth), Fender Washers, Sealing Washers, Belleville Washers, Wave Washers', '104', 'Small,Medium,Large',8),
+
+-- 6. Clips & Clamps
+('Clips & Clamps', 'Retaining Clips, Push Pins, Spring Clips, Hose Clamps, Cable Clips, Wire Clips, Gripper Clips, Snap Clips', '105', 'Small,Medium,Large',8),
+
+-- 7. Pins
+('Pins', 'Cotter Pins, Roll Pins (Spring Pins), Dowel Pins, Clevis Pins, Hairpin Cotter Pins, Taper Pins', '106', 'Small,Medium,Large',8),
+
+-- 8. Fasteners for Interior Components
+('Interior', 'Seat Mounting Bolts, Seat Belt Fasteners, Dashboard Screws & Clips, Trim Clips, Floor Mat Clips', '107', 'Small,Medium,Large',8),
+
+-- 9. Electrical System Fasteners
+('Electrical', 'Cable Ties (Zip Ties), Battery Terminal Bolts, Fuse Box Screws, Terminal Blocks', '108', 'Small,Medium,Large',8),
+
+-- 10. Security Fasteners
+('Security', 'Tamper-Proof Screws (e.g., Torx, Pentalobe, Clutch Head), Locking Bolts & Nuts, Security Clips', '109', 'Small,Medium,Large',8),
+
+-- 11. Fasteners for Body Panels
+('Body Panels', 'Body Panel Clips, Rivets (Pop & Solid), Plastic Fasteners, Bumper Clips, Grille Fasteners, Windshield Trim Clips', '110', 'Small,Medium,Large',8),
+
+-- 12. Suspension & Steering Fasteners
+('Suspension & Steering', 'Control Arm Bolts, Ball Joint Bolts, Strut Mount Bolts, Tie Rod End Nuts, Steering Rack Bolts, Shock Absorber Bolts', '111', 'Small,Medium,Large',8),
+
+-- 13. Engine & Mechanical Fasteners
+('Engine & Mechanical', 'Head Bolts, Exhaust Manifold Bolts, Intake Manifold Bolts, Oil Pan Bolts, Timing Belt Tensioner Bolts, Torque Converter Bolts, Flywheel Bolts', '112', 'Small,Medium,Large',8),
+
+-- 14. Exhaust System Fasteners
+('Exhaust', 'Exhaust Clamps, Exhaust Flange Bolts, Heat-Resistant Fasteners', '113', 'Small,Medium,Large',8),
+
+-- 15. Fuel System Fasteners
+('Fuel System', 'Fuel Tank Straps, Fuel Line Clamps, Fuel Line Fittings', '114', 'Small,Medium,Large',8),
+
+-- 16. Brake System Fasteners
+('Brake System', 'Brake Line Fittings, Brake Caliper Bolts, Brake Rotor Fasteners', '115', 'Small,Medium,Large',8),
+
+-- 17. Transmission Fasteners
+('Transmission', 'Transmission Mount Bolts, Transmission Pan Bolts, Shift Linkage Fasteners, Flywheel Bolts', '116', 'Small,Medium,Large',8),
+
+-- 18. Radiator & Cooling Fasteners
+('Radiator & Cooling', 'Radiator Bolts, Radiator Hose Clamps, Fan Mounting Bolts', '117', 'Small,Medium,Large',8),
+
+-- 19. Underbody & Frame Fasteners
+('Underbody & Frame', 'Chassis Bolts, Suspension Mounting Bolts, Control Arm Bolts, Axle Shaft Fasteners', '118', 'Small,Medium,Large',8),
+
+-- 20. Miscellaneous Fasteners
+('Miscellaneous', 'Hood Latch Bolts, Trunk Lock Bolts, Windshield Wiper Arm Bolts, Fender Fasteners, Air Conditioning System Fasteners', '119', 'Small,Medium,Large',8);
+
