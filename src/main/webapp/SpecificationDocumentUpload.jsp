@@ -26,7 +26,6 @@
     color: #333;
   }
 
-  /* Box styling */
   .topbar > div {
     display: flex;
     align-items: center;
@@ -146,13 +145,12 @@
     font-size: 13px;
   }
 .sidebar {
-  width: 16%;
+  width: 19%;
   background-color: #f8f9fa;
   border-right: 1px solid #ddd;
   padding: 20px;
   font-size: 14px;
   box-sizing: border-box;
-   resize: horizontal;
   overflow-y: auto;
   overflow-x: hidden; 
 }
@@ -265,9 +263,7 @@ table.properties th {
     right: 10px;
     font-size: 14px;
     color: #666;
-  }
-
-  
+  } 
   #errorMessage {
     display: none;
     color: red;
@@ -332,11 +328,37 @@ forn-wrap-mode:nowrap;
         white-space: nowrap;
         text-wrap-mode:nowrap;
     }
-   #typeIcon {
-  width: 100px;
-  height: 100px;
+  #typeIcon {
+  width: 50px;
+  height: 50px;
   object-fit: contain; 
 }
+   .state-box .state-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  color: white;
+  margin-left: 8px;
+  user-select: none;
+  text-transform: uppercase;
+  min-width: 80px;
+  text-align: center;
+}
+.state-badge.InWork {
+  background-color: #5bc0de;
+}
+.state-badge.Frozen {
+  background-color: #6c757d;
+}
+.state-badge.Approved {
+  background-color: #28a745;
+}
+.state-badge.Released {
+  background-color: #ffc107;
+  color: #000;
+} 
 </style>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -356,13 +378,12 @@ forn-wrap-mode:nowrap;
       <div class="part-number" style="font-weight: 700; font-size: 14px;"></div>
       <div class="part-type" style="font-size: 12px; color: #666; margin-top: 2px;"></div>
     </div>
-    <div class="vertical-line"></div>
+   <div class="vertical-line"></div>
   </div>
     <div class="right-section">
         <div class="state-box">
             <span class="state-label">State:</span>
-            <button id="submitBtn" class="btn-submit">InWork</button>
-            <button id="evaluateBtn" class="btn-evaluate">Frozen</button>
+
         </div>
         <div class="vertical-line"></div>
         <div class="info-box"></div>
@@ -377,7 +398,6 @@ forn-wrap-mode:nowrap;
         <a class="nav-link" href="ControlManagement.jsp?name=<%= request.getParameter("name") %>">Control Management</a>
    		<a class="nav-link" href="PartSpecification.jsp?name=<%= request.getParameter("name") %>">PartSpecification</a>
    		<a class="nav-link active" href="SpecificationDocumentUpload.jsp?name=<%=request.getParameter("name") %>">SpecificationDocument</a>
-   		
     </div>
    <div class="main-panel">
     <div class="toolbar mt-2">
@@ -391,61 +411,153 @@ forn-wrap-mode:nowrap;
     <input type="file" id="fileInput" style="display: none;" />
     <div id="loadingSpinner"></div>
     <div id="errorMessage" class="error"></div>
+  <div class="table-responsive mt-3">
+  <table id="documentTable" class="properties">
+    <thead>
+      <tr>
+        <th>Uploaded File List</th>
+      </tr>
+    </thead>
+    <tbody id="documentTableBody"></tbody>
+  </table>
+</div>
 </div>
 </div>
 <script>
+$(document).ready(function () {
+    const partInfo = JSON.parse(sessionStorage.getItem('partInfo'));
+
+    if (partInfo) {
+        $('.part-number').text(partInfo.name || '');
+        $('.part-type').text(partInfo.type || '');
+
+        const icon = (partInfo.type && partInfo.type.toLowerCase() === 'fastener')
+            ? 'https://img.icons8.com/?size=50&id=20544&format=png&color=000000'
+            : 'https://img.icons8.com/?size=50&id=OCre7GSjDUBi&format=png&color=000000';
+
+        $('#typeIcon').attr('src', icon);
+
+        $('.state-box .state-label').remove();
+        if (partInfo.currentstate) {
+    	    $('.state-box .state-label').remove();
+    	    const state = partInfo.currentstate;
+    	    const badge = $('<span>')
+    	        .addClass('state-badge ' + state.replace(/\s/g, ''))
+    	        .text(state);
+    	    $('<span>')
+    	        .addClass('state-label')
+    	        .text('State: ')
+    	        .append(badge)
+    	        .prependTo('.state-box');
+    	}
+    }
+
+    loadUploadedFiles();
+});
+
 document.getElementById('uploadBtn').addEventListener('click', function () {
-  document.getElementById('fileInput').click();
+    document.getElementById('fileInput').click();
 });
 
 document.getElementById('fileInput').addEventListener('change', function (event) {
-  const file = event.target.files[0];
-  if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-  $('#loadingSpinner').text('Uploading....').show();
-  $('#errorMessage').hide();
+    $('#loadingSpinner').text('Uploading...').show();
+    $('#errorMessage').hide();
 
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    const base64Data = e.target.result.split(',')[1]; 
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const base64Data = e.target.result.split(',')[1]; 
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const objectId = urlParams.get('name') || '';
+
+        const payload = JSON.stringify({
+            objectid: objectId,
+            fileContentBase64: base64Data,
+            fileName: file.name,
+            fileType: file.type
+        });
+
+        $.ajax({
+            url: 'http://localhost:8080/andromeda/api/datafetchservice/upload',
+            type: 'POST',
+            data: payload,
+            contentType: 'application/json',
+            success: function (response) {
+                $('#loadingSpinner').hide();
+                if (response.message) {
+                    alert(response.message);
+                } else if (response.error) {
+                    $('#errorMessage').text(response.error).show();
+                } else {
+                    alert('Upload Completed');
+                }
+                loadUploadedFiles();
+            },
+            error: function (xhr, status, error) {
+                $('#loadingSpinner').hide();
+                $('#errorMessage').text('Upload failed: ' + error).show();
+            }
+        });
+    };
+
+    reader.onerror = function () {
+        $('#loadingSpinner').hide();
+        $('#errorMessage').text('Failed to read file').show();
+    };
+
+    reader.readAsDataURL(file);
+});
+
+function loadUploadedFiles() {
     const urlParams = new URLSearchParams(window.location.search);
     const objectId = urlParams.get('name') || '';
 
-    const payload = JSON.stringify({
-      objectid: objectId,
-      fileContentBase64: base64Data,
-      fileName: file.name,
-      fileType: file.type
-    });
+    if (!objectId) return;
 
     $.ajax({
-      url: 'http://localhost:8080/andromeda/api/datafetchservice/upload',
-      type: 'POST',
-      data: payload,
-      contentType: 'application/json',
-      success: function (response) {
-        $('#loadingSpinner').hide();
-        if (response.message) {
-          alert(response.message);
-        } else if (response.error) {
-          $('#errorMessage').text(response.error).show();
-        } else {
-          alert('Upload Completed');
+        url: 'http://localhost:8080/andromeda/api/datafetchservice/getUploadedFiles?objectid=' + encodeURIComponent(objectId),
+        method: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            const tbody = $('#documentTableBody');
+            tbody.empty();
+
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(function (file) {
+                    const row = $('<tr></tr>');
+                    const link = $('<a></a>').attr('href', '#').text(file.fileName).on('click', function (e) {
+                         e.preventDefault();
+                          downloadFile(file.fileName);
+                        });
+                    row.append($('<td></td>').append(link));
+                    tbody.append(row);
+                });
+            } else {
+                tbody.append('<tr><td>No files uploaded</td></tr>');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error fetching files:', error);
+            $('#errorMessage').text('Failed to fetch files').show();
         }
-      },
-      error: function (xhr, status, error) {
-        $('#loadingSpinner').hide();
-        $('#errorMessage').text('Upload failed: ' + error).show();
-      }
     });
-  };
-  reader.onerror = function () {
-    $('#loadingSpinner').hide();
-    $('#errorMessage').text('Failed to read file').show();
-  };
-  reader.readAsDataURL(file);
-});
+}
+
+function downloadFile(fileName) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const objectId = urlParams.get('name') || '';
+    if (!objectId || !fileName) return;
+    const downloadUrl = 'http://localhost:8080/andromeda/api/datafetchservice/download?objectid='+ encodeURIComponent(objectId) + '&fileName=' + encodeURIComponent(fileName);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
 </script>
 </body>
 </html>

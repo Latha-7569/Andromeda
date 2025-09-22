@@ -226,7 +226,7 @@
         <option value="byParts">byParts</option>
         <option value="byPersons">byPersons</option>
       </select>
-      <input type="text" id="searchInput" class="form-control" placeholder="Search..." required style="border-top-right-radius: 30px; border-bottom-right-radius: 30px;">
+       <input type="text" id="searchInput" class="form-control" placeholder="Search..." style="border-top-right-radius: 30px; border-bottom-right-radius: 30px;">
     </div>
     <button type="submit" id="searchButton" style="display: none;">Search</button>
   </form>
@@ -531,7 +531,8 @@
 	  e.preventDefault();
 	  window.open('CreatePartSpecification.jsp','CreatePartSpecificatioPopup','width=600,height=700,resizable=yes,scrollable=yes');    
   });
-    
+ 
+ 
     //search
   function showLoadingSpinner(show) {
   const spinner = document.getElementById('loadingSpinner');
@@ -546,8 +547,8 @@
 	    const searchQuery = searchInput.value.trim();
 	    const filterValue = filterSelect.value.trim();
 
-	    if (searchQuery.length < 3) {
-	        alert('Please enter at least 3 characters');
+	    if (searchQuery.length < 2) {
+	        alert('Please enter at least 2 characters');
 	        return;
 	    }
 	    if (filterValue === null || filterValue === undefined) {

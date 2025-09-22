@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -63,15 +64,25 @@ public class SearchData {
         try (Connection conn = DriverManager.getConnection(url, user, db_password)) {
             PreparedStatement ps;
             String sql;
-            
+
             if (name.toUpperCase().matches("^(PC)[-]?[0-9]*$")) {
+                //  PC-000001 
                 sql = "SELECT * FROM amxpartcontroldata WHERE fts_document @@ to_tsquery(?)";
                 ps = conn.prepareStatement(sql);
                 ps.setString(1, name.toLowerCase() + ":*");
+
             } else if (name.matches("^(\\d{3})([-\\w]*)?$")) {
+                //900 or 900-000
                 sql = "SELECT * FROM amxcorepartdata WHERE fts_document @@ to_tsquery(?)";
                 ps = conn.prepareStatement(sql);
                 ps.setString(1, name.toLowerCase() + ":*");
+
+            } else if (name.toUpperCase().startsWith("PASP")) {
+                //PASP
+                sql = "SELECT * FROM amxpartspecificationdata WHERE fts_document @@ to_tsquery(?)";
+                ps = conn.prepareStatement(sql);
+                ps.setString(1, name.toLowerCase() + ":*");
+
             } else {
                 resp.put("Status", "Failed").put("Message", "Unsupported search pattern.");
                 return Response.status(Response.Status.BAD_REQUEST).entity(resp.toString()).build();
@@ -98,56 +109,48 @@ public class SearchData {
         }
     }
 
+
     
     //addexistingpart
-    @SuppressWarnings("unchecked")
     @POST
     @Path("/popupsearch/{sourceobjectid}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addPartControlWithSource(@PathParam("sourceobjectid") String sourceObjectId, Map<String, Object> inputData) {
+    public Response addPartControlWithSource(@PathParam("sourceobjectid") String sourceObjectId, 
+                                             List<Map<String, Object>> partControls) {
         try {
-            if (inputData == null || !inputData.containsKey("partcontrol")) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(Map.of("error", "Missing required 'partcontrol' data"))
-                        .build();
+            if (partControls == null || partControls.isEmpty()) {
+                return Response.ok("error", "No part control data provided").build();
             }
-            Object partObj = inputData.get("partcontrol");
-            if (!(partObj instanceof List)) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(Map.of("error", "'partcontrol' must be a list of part controls"))
-                        .build();
-            }
-
-            List<Map<String, Object>> partControls = (List<Map<String, Object>>) partObj;
             if (sourceObjectId == null || sourceObjectId.isEmpty()) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(Map.of("error", "'sourceobjectid' is required"))
-                        .build();
+                return Response.ok("error", "'sourceobjectid' is required").build();
             }
             String connectionId = generateConnectionId();
             String createdDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             LocalDateTime localDateTime = LocalDateTime.parse(createdDate, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
             String insertSQL = "INSERT INTO amxcoreconnectiondata (connectionid, type, name, fromid, toid, fromname, toname, createddate) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-
+                             + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             try (Connection conn = DriverManager.getConnection(url, user, db_password)) {
-                conn.setAutoCommit(false);
-
+                conn.setAutoCommit(false);  
                 try (PreparedStatement ps = conn.prepareStatement(insertSQL)) {
                     for (Map<String, Object> rawPartControl : partControls) {
                         Map<String, String> partControlMap = new HashMap<>();
                         for (Map.Entry<String, Object> entry : rawPartControl.entrySet()) {
                             partControlMap.put(entry.getKey().toLowerCase(), entry.getValue() == null ? "" : entry.getValue().toString());
                         }
-
                         String partName = partControlMap.get("name");
                         String partType = partControlMap.get("type");
                         String partId = partControlMap.get("objectid");
-
-                        if (partName == null || partType == null || partId == null || sourceObjectId == null) {
-                            System.err.println("Skipping insert due to missing data.");
+                        if (partName == null || partType == null || partId == null) {
+                            //System.err.println("Skipping insert due to missing data in part control: " + partControlMap);
+                            continue;
+                        }
+                        String fromName = "";
+                        if ("partspecification".equalsIgnoreCase(partType)) {
+                            fromName = "PartSpecification";
+                        } else if ("partcontrol".equalsIgnoreCase(partType)) {
+                            fromName = "PartControl";  
+                        } else {
                             continue;
                         }
                         ps.setString(1, connectionId);
@@ -155,24 +158,28 @@ public class SearchData {
                         ps.setString(3, partName);
                         ps.setString(4, partId);
                         ps.setString(5, sourceObjectId);
-                        ps.setString(6, "partcontrol");
-                        ps.setString(7, "part");
-                        ps.setObject(8, localDateTime);
+                        ps.setString(6, fromName); 
+                        ps.setString(7, "part");  
+                        ps.setTimestamp(8, Timestamp.valueOf(localDateTime)); 
                         ps.executeUpdate();
                     }
                 }
+
+                // Update amxcorepartdata table 
                 String updateSQL = "UPDATE amxcorepartdata SET connectionid = ? WHERE objectid = ?";
-                
                 try (PreparedStatement psUpdate = conn.prepareStatement(updateSQL)) {
                     psUpdate.setString(1, connectionId);
-                    psUpdate.setString(2, sourceObjectId); 
+                    psUpdate.setString(2, sourceObjectId);
                     int rowsUpdated = psUpdate.executeUpdate();
+
                     if (rowsUpdated == 0) {
+                        conn.rollback();
                         return Response.status(Response.Status.NOT_FOUND)
                                 .entity(Map.of("error", "No record found for sourceObjectId: " + sourceObjectId))
                                 .build();
                     }
                 }
+                conn.commit();
 
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -180,7 +187,9 @@ public class SearchData {
                         .entity(Map.of("error", "Database error: " + e.getMessage()))
                         .build();
             }
+
             return Response.ok(Map.of("message", "Part controls and connections successfully added", "connectionid", connectionId)).build();
+
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -188,22 +197,20 @@ public class SearchData {
                     .build();
         }
     }
-
     public String generateConnectionId() {
         SecureRandom random = new SecureRandom();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 3; i++) {
             String segment = Integer.toHexString(random.nextInt(0x10000)).toUpperCase();
-            while (segment.length() < 4) { 
+            while (segment.length() < 4) {
                 segment = "0" + segment;
             }
             sb.append(segment);
-            if (i < 2) sb.append(".");  
+            if (i < 2) sb.append(".");
         }
-        sb.append(".CONN"); 
+        sb.append(".CONN");
         return sb.toString();
     }
-
 
     
 }

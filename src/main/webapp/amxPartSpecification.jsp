@@ -9,7 +9,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Control Management</title>
+<title>amxPartSpecification</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -345,13 +345,6 @@ forn-wrap-mode:nowrap;
         white-space: nowrap;
         text-wrap-mode:nowrap;
     }
-    .section-label {
-    font-weight: bold;
-    font-size: 14px;
-    margin: 10px 0 5px 0;
-    color: #333;
-  }
-  
 </style>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -365,21 +358,8 @@ forn-wrap-mode:nowrap;
 
 <div class="topbar">
      <div class="left-section">
-    <div class="image-box">
-            <img id="typeIcon" src="" alt="Type Icon" />
-      </div>
-    <div class="part-info">
-      <div class="part-number" style="font-weight: 700; font-size: 14px;"></div>
-      <div class="part-type" style="font-size: 12px; color: #666; margin-top: 2px;"></div>
-    </div>
-    <div class="vertical-line"></div>
   </div>
     <div class="right-section">
-        <div class="state-box">
-            <span class="state-label">State:</span>
-            <button id="submitBtn" class="btn-submit">InWork</button>
-            <button id="evaluateBtn" class="btn-evaluate">Frozen</button>
-        </div>
         <div class="vertical-line"></div>
         <div class="info-box"></div>
         <div class="vertical-line"></div>
@@ -387,13 +367,8 @@ forn-wrap-mode:nowrap;
 </div>
 <div class="container">
     <div class="sidebar">
-       <a class="nav-link" href="Properties.jsp?name=<%= request.getParameter("name") %>">Part Properties</a>
-        <a class="nav-link" href="Parthistory.jsp?name=<%= request.getParameter("name") %>">History</a>
-        <a class="nav-link" href="Lifecycle.jsp?name=<%= request.getParameter("name") %>">LifeCycle</a>
-        <a class="nav-link active" href="ControlManagement.jsp?name=<%= request.getParameter("name") %>">Control Management</a>
-   		<a class="nav-link" href="PartSpecification.jsp?name=<%= request.getParameter("name") %>">PartSpecification</a>
-   		<a class="nav-link" href="SpecificationDocumentUpload.jsp?name=<%=request.getParameter("name") %>">SpecificationDocument</a>
-   		
+            <a class="nav-link" href="Properties.jsp?name=<%= request.getParameter("name") %>">PS-Properties</a>
+    
     </div>
    <div class="main-panel">
     <div class="toolbar mt-2">
@@ -407,8 +382,7 @@ forn-wrap-mode:nowrap;
 
     <div id="loadingSpinner"></div>
     <div id="errorMessage" class="error"></div>
-        <div class="section-label">PartControlTable</div>
-    <table class="table table-bordered mt-2" id="partControlTable">
+    <table class="table table-bordered mt-2" id="partSpecificationTable">
     <thead>
         <tr>
         </tr>
@@ -428,13 +402,15 @@ function receiveSelectedParts(selectedParts) {
         return; 
     }
     console.log("Received selected parts:", selectedParts);
-    let table = $('#partControlTable').DataTable();
+
+    const table = $('#partSpecificationTable').DataTable();
+
     if (!table) {
         console.log("Table not initialized. Initializing...");
         loadPartControlTable();
-        setTimeout(() => receiveSelectedParts(selectedParts), 500);
         return;
     }
+
     selectedParts.forEach(part => {
         const columns = table.settings().init().columns;
         const newRowData = columns.map(col => part[col.data] || '');
@@ -444,10 +420,9 @@ function receiveSelectedParts(selectedParts) {
     $('#errorMessage').text('New parts added.');
 }
 
-
 function loadPartControlTable() {
     $('#errorMessage').text('Loading part controls...');
-    $('.section-label:contains("PartControlTable")').hide();
+
     const urlParams = new URLSearchParams(window.location.search);
     const objectid = urlParams.get('name');
 
@@ -457,39 +432,33 @@ function loadPartControlTable() {
     }
 
     $.ajax({
-        url: 'http://localhost:8080/andromeda/api/datafetchservice/getcreatedpartcontrol',
+        url: 'http://localhost:8080/andromeda/api/datafetchservice/getpartspecification',
         data: { objectid: objectid },
         dataType: 'json',
         cache: false,
         success: function(data) {
             $('#errorMessage').text('');
-            
-            if (!data || !Array.isArray(data) || data.length === 0 || data.message) {
-                $('#errorMessage').text(data ? data.message || 'No part Control found.' : 'Error loading data.');
-                if ($.fn.DataTable.isDataTable('#partControlTable')) {
-                    $('#partControlTable').DataTable().clear().draw();
+            if (!data || data.length === 0 || data.message) {
+                $('#errorMessage').text(data.message || 'No part Specification found.');
+                if ($.fn.DataTable.isDataTable('#partSpecificationTable')) {
+                    $('#partSpecificationTable').DataTable().clear().draw();
                 }
-                $('.section-label:contains("PartControlTable")').hide();
-                $('#partControlTable').hide();
                 return;
             }
 
-            $('.section-label:contains("PartControlTable")').show();
-            $('#partControlTable').show();
-            
-            const excludedFields = ['objectid', 'linkedobjectid', 'connectionid', 'fts_document'];
-            const columns = Object.keys(data[0])  
-                .filter(key => !excludedFields.includes(key))
+            const excludedFields = ['objectid', 'linkedobjectid', 'connectionid'];
+            const columns = Object.keys(data[0])
+                .filter(key => !excludedFields.includes(key)) 
                 .map(key => ({
                     data: key,
-                    title: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')
+                    title: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ') 
                 }));
 
-            if ($.fn.DataTable.isDataTable('#partControlTable')) {
-                $('#partControlTable').DataTable().clear().destroy();
+            if ($.fn.DataTable.isDataTable('#partSpecificationTable')) {
+                $('#partSpecificationTable').DataTable().clear().destroy();
             }
 
-            const thead = $('#partControlTable thead');
+            const thead = $('#partSpecificationTable thead');
             thead.empty();
             const headerRow = $('<tr></tr>');
             columns.forEach(col => {
@@ -497,10 +466,10 @@ function loadPartControlTable() {
             });
             thead.append(headerRow);
 
-            $('#partControlTable').DataTable({
+            $('#partSpecificationTable').DataTable({
                 data: data,
                 columns: columns,
-                order: [[columns.findIndex(c => c.data === 'createddate') || 0, 'desc']],
+                order: [[columns.findIndex(c => c.data === 'createdtime') || 0, 'desc']],
                 paging: false,
                 searching: false,
                 scrollX: true,
@@ -514,75 +483,47 @@ function loadPartControlTable() {
         }
     });
 }
-    $(document).ready(function() {
-        loadPartControlTable();
-        const partInfo = JSON.parse(sessionStorage.getItem('partInfo'));
-        if (partInfo) {
-            $('.part-number').text(partInfo.name || '');
-            $('.part-type').text(partInfo.type || '');
-            const icon = (partInfo.type && partInfo.type.toLowerCase() === 'fastener') 
-                ? 'https://img.icons8.com/?size=50&id=20544&format=png&color=000000' 
-                : 'https://img.icons8.com/?size=50&id=OCre7GSjDUBi&format=png&color=000000';
 
-            $('#typeIcon').attr('src', icon);
-            $('.state-box .state-label').remove();
-            if (partInfo.state) {
-                $('<span>')
-                    .addClass('state-label')
-                    .text('State: ' + partInfo.state)
-                    .prependTo('.state-box');
-            }
-        } else {
-            $('.part-number').text('');
-            $('.part-type').text('');
-            $('#typeIcon').attr('src', 'https://img.icons8.com/?size=50&id=OCre7GSjDUBi&format=png&color=000000');
-            $('.state-box .state-label').remove();
-        }
+$(document).ready(function() {
+    loadPartControlTable();
 
-        document.getElementById('openCreatePanelBtn').addEventListener('click', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const objectid = urlParams.get('name');
-
-            if (objectid) {
-                const panel = document.getElementById('createPanel');
-                panel.classList.add('active');
-                document.getElementById('createIframe').src = 'Partcontrolwithconnection.jsp?name=' + encodeURIComponent(objectid);
-            } else {
-                alert('No object ID found!');
-            }
-        });
+    document.getElementById('openCreatePanelBtn').addEventListener('click', function () {
+        const panel = document.getElementById('createPanel');
+        panel.classList.add('active');
+        document.getElementById('createIframe').src = 'CreatePartSpecification.jsp';
     });
 
     $('#addExistingpart').on('click', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const objectid = urlParams.get('name');
-
-        if (objectid) {
-            const targetUrl = 'search.jsp?name=' + encodeURIComponent(objectid);
-            window.open(targetUrl,'AddExistingPartPopup','width=900,height=800, position=center,left=100,top=100,resizable=yes' );
-        } else {
-            alert('No object ID found!');
-        }
+        const targetUrl = 'search.jsp';
+        window.open(targetUrl, 'AddExistingPartPopup', 'width=900,height=800,left=100,top=100,resizable=yes');
     });
+});
 
-    window.addEventListener('message', function(event) {
-        if (!event.data) return;
+window.addEventListener('message', function (event) {
+    const action = event.data?.action;
+    const createPanel = document.getElementById('createPanel');
 
-        if (event.data.action === 'closeOnly') {
-            document.getElementById('createPanel').classList.remove('active');
-        } else if (event.data.action === 'closeAndRefresh') {
-            document.getElementById('createPanel').classList.remove('active');
-            loadPartControlTable(); 
-        } else if (event.data && event.data.selectedParts) {
-            receiveSelectedParts(event.data.selectedParts);
-        }
-    });
+    if (!createPanel) return;
 
-    function closeCreatePanel() {
-        const panel = document.getElementById('createPanel');
-        panel.classList.remove('active');
-        document.getElementById('createIframe').src = '';
+    if (action === 'closeOnly') {
+        createPanel.classList.remove('active');
     }
+
+    if (action === 'closeAndRefresh') {
+    	  createPanel.classList.remove('active');
+    	  const createdPartId = event.data?.createdPartId;
+    	  if (createdPartId) {
+    	    window.location.href = 'Properties.jsp?name=' + encodeURIComponent(createdPartId);
+    	  } else {
+    	    loadPartControlTable();
+    	  }
+    	}
+});
+function closeCreatePanel() {
+    const panel = document.getElementById('createPanel');
+    panel.classList.remove('active');
+    document.getElementById('createIframe').src = '';
+}
 </script>
 </body>
 </html>
