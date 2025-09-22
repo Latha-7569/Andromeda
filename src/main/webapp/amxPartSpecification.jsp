@@ -9,7 +9,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Part Specification</title>
+<title>amxPartSpecification</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -18,6 +18,7 @@
     color: #333;
   }
 
+  /* Top Bar Container */
   .topbar {
     display: flex;
     background: #f5f7fa;
@@ -27,6 +28,7 @@
     color: #333;
   }
 
+  /* Box styling */
   .topbar > div {
     display: flex;
     align-items: center;
@@ -37,10 +39,12 @@
     white-space: nowrap;
   }
 
+  /* Last box has right border */
   .topbar > div:last-child {
     border-right: 1px solid #cfd3db;
   }
 
+  /* Folder Icon Box */
   .folder-box {
     background: #e3e7eb;
     border: 1px solid #d1d6dc;
@@ -58,6 +62,7 @@
     height: 16px;
   }
 
+  /* Part Number box */
   .part-number {
     font-weight: 700;
     font-size: 14px;
@@ -66,6 +71,7 @@
     margin-right: 12px;
   }
 
+  /* Description box */
   .description {
     font-weight: 600;
     font-size: 13px;
@@ -75,6 +81,7 @@
     margin-right: 12px;
   }
 
+  /* State box */
   .state-box {
     font-weight: 600;
     font-size: 13px;
@@ -90,6 +97,7 @@
     margin-right: 4px;
   }
 
+  /* Buttons styling */
   .btn-submit {
     background-color: #5c8bff;
     border: 1px solid #3f70ff;
@@ -120,6 +128,7 @@
     background-color: #c6cad2;
   }
 
+  /* Info box */
   .info-box {
     font-size: 11px;
     color: #666;
@@ -131,14 +140,15 @@
     color: #444;
   }
 
+  /* Adjust spacing between boxes */
   .topbar > div:not(:last-child) {
-    margin-right: -1px; 
+    margin-right: -1px; /* To collapse adjacent borders */
   }
 	
 	.vertical-line img {
-  height: 20px;  
-  width: 1px;    
-  margin: 0 10px; 
+  height: 20px;  /* Adjust height to make it appear like a line */
+  width: 1px;    /* Make it thin like a vertical line */
+  margin: 0 10px; /* Space around the line */
 }
 
   .container {
@@ -147,12 +157,13 @@
     font-size: 13px;
   }
 .sidebar {
-  width: 19%;
+  width: 16%;
   background-color: #f8f9fa;
   border-right: 1px solid #ddd;
   padding: 20px;
   font-size: 14px;
   box-sizing: border-box;
+   resize: horizontal;
   overflow-y: auto;
   overflow-x: hidden; 
 }
@@ -176,6 +187,7 @@
    font-weight: bold;
 }
 
+/* Main Panel */
 .main-panel {
   flex-grow: 1;
   padding: 20px;
@@ -222,7 +234,7 @@
   }
 
 table.properties {
-  width: 100%;
+  width: 100%; /* full width */
   border-collapse: collapse;
   border: 1px solid #ddd;
   font-size: 16px;
@@ -233,14 +245,14 @@ table.properties {
 table.properties th,
 table.properties td {
   padding: 12px 16px;
-  border: 1px solid #ddd; 
+  border: 1px solid #ddd; /* add borders on all cells */
   vertical-align: middle;
 }
 
 table.properties th {
   background: #fafafa;
   font-weight: bold;
-  width: 200px; 
+  width: 200px; /* label column width */
   text-align: left;
 }
 
@@ -258,6 +270,7 @@ table.properties th {
   margin-top: 0;
 }
 
+  /* Loading Spinner */
   #loadingSpinner {
     display: none;
     position: fixed;
@@ -332,41 +345,6 @@ forn-wrap-mode:nowrap;
         white-space: nowrap;
         text-wrap-mode:nowrap;
     }
-   .section-label {
-    font-weight: bold;
-    font-size: 14px;
-    margin: 10px 0 5px 0;
-    color: #333;
-  }
-#partSpecificationTable, #addExistingDataTable {
-    display: none;
-}
- .state-box .state-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 13px;
-  color: white;
-  margin-left: 8px;
-  user-select: none;
-  text-transform: uppercase;
-  min-width: 80px;
-  text-align: center;
-}
-.state-badge.InWork {
-  background-color: #5bc0de;
-}
-.state-badge.Frozen {
-  background-color: #6c757d;
-}
-.state-badge.Approved {
-  background-color: #28a745;
-}
-.state-badge.Released {
-  background-color: #ffc107;
-  color: #000;
-} 
 </style>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -380,35 +358,17 @@ forn-wrap-mode:nowrap;
 
 <div class="topbar">
      <div class="left-section">
-    <div class="image-box">
-            <img id="typeIcon" src="" alt="Type Icon" />
-      </div>
-    <div class="part-info">
-      <div class="part-number" style="font-weight: 700; font-size: 14px;"></div>
-      <div class="part-type" style="font-size: 12px; color: #666; margin-top: 2px;"></div>
-    </div>
-    <div class="vertical-line"></div>
   </div>
     <div class="right-section">
-        <div class="state-box">
-            <span class="state-label">State:</span>
-
-        </div>
         <div class="vertical-line"></div>
         <div class="info-box"></div>
         <div class="vertical-line"></div>
     </div>
 </div>
 <div class="container">
-    <div 
+    <div class="sidebar">
+            <a class="nav-link" href="Properties.jsp?name=<%= request.getParameter("name") %>">PS-Properties</a>
     
-    class="sidebar">
-       <a class="nav-link" href="Properties.jsp?name=<%= request.getParameter("name") %>">Part Properties</a>
-        <a class="nav-link" href="Parthistory.jsp?name=<%= request.getParameter("name") %>">History</a>
-        <a class="nav-link" href="Lifecycle.jsp?name=<%= request.getParameter("name") %>">LifeCycle</a>
-        <a class="nav-link" href="ControlManagement.jsp?name=<%= request.getParameter("name") %>">Control Management</a>
-   		<a class="nav-link active" href="PartSpecification.jsp?name=<%= request.getParameter("name") %>">PartSpecification</a>
-   		<a class="nav-link" href="SpecificationDocumentUpload.jsp?name=<%=request.getParameter("name") %>">SpecificationDocument</a>
     </div>
    <div class="main-panel">
     <div class="toolbar mt-2">
@@ -422,17 +382,7 @@ forn-wrap-mode:nowrap;
 
     <div id="loadingSpinner"></div>
     <div id="errorMessage" class="error"></div>
-    <div class="section-label">PartSpecificationTable</div>
     <table class="table table-bordered mt-2" id="partSpecificationTable">
-    <thead>
-        <tr>
-        </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
-<div class="section-label">AddExistingParts</div>
- <table class="table table-bordered mt-2" id="addExistingDataTable">
     <thead>
         <tr>
         </tr>
@@ -452,13 +402,15 @@ function receiveSelectedParts(selectedParts) {
         return; 
     }
     console.log("Received selected parts:", selectedParts);
-    let table = $('#partSpecificationTable').DataTable();
+
+    const table = $('#partSpecificationTable').DataTable();
+
     if (!table) {
         console.log("Table not initialized. Initializing...");
         loadPartControlTable();
-        setTimeout(() => receiveSelectedParts(selectedParts), 500);
         return;
     }
+
     selectedParts.forEach(part => {
         const columns = table.settings().init().columns;
         const newRowData = columns.map(col => part[col.data] || '');
@@ -468,10 +420,8 @@ function receiveSelectedParts(selectedParts) {
     $('#errorMessage').text('New parts added.');
 }
 
-function loadPartSpecificationTable() {
+function loadPartControlTable() {
     $('#errorMessage').text('Loading part controls...');
-    $('.section-label:contains("PartSpecificationTable")').hide();
-    $('#partSpecificationTable').hide();
 
     const urlParams = new URLSearchParams(window.location.search);
     const objectid = urlParams.get('name');
@@ -482,31 +432,26 @@ function loadPartSpecificationTable() {
     }
 
     $.ajax({
-        url: 'http://localhost:8080/andromeda/api/datafetchservice/getcreatedpartspecification',
+        url: 'http://localhost:8080/andromeda/api/datafetchservice/getpartspecification',
         data: { objectid: objectid },
         dataType: 'json',
         cache: false,
         success: function(data) {
             $('#errorMessage').text('');
-            if (!data || !Array.isArray(data) || data.length === 0 || data.message) {
-                $('#errorMessage').text(data ? data.message || 'No part Specification found.' : 'Error loading data.');
+            if (!data || data.length === 0 || data.message) {
+                $('#errorMessage').text(data.message || 'No part Specification found.');
                 if ($.fn.DataTable.isDataTable('#partSpecificationTable')) {
-                    $('#partSpecificationTable').DataTable().clear().destroy();
+                    $('#partSpecificationTable').DataTable().clear().draw();
                 }
-                $('.section-label:contains("PartSpecificationTable")').hide();
-                $('#partSpecificationTable').hide();
                 return;
             }
 
-            $('.section-label:contains("PartSpecificationTable")').show();
-            $('#partSpecificationTable').show();
-
-            const excludedFields = ['objectid', 'linkedobjectid', 'connectionid', 'fts_document'];
+            const excludedFields = ['objectid', 'linkedobjectid', 'connectionid'];
             const columns = Object.keys(data[0])
-                .filter(key => !excludedFields.includes(key))
+                .filter(key => !excludedFields.includes(key)) 
                 .map(key => ({
                     data: key,
-                    title: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')
+                    title: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ') 
                 }));
 
             if ($.fn.DataTable.isDataTable('#partSpecificationTable')) {
@@ -535,159 +480,50 @@ function loadPartSpecificationTable() {
         error: function(xhr, status, error) {
             console.error('AJAX error:', status, error);
             $('#errorMessage').text('Failed to load part controls.');
-            $('.section-label:contains("PartSpecificationTable")').hide();
-            $('#partSpecificationTable').hide();
         }
     });
 }
 
-function loadAddExistingPartTable() {
-    $('#errorMessage').text('Loading Add Existing parts...');
-    $('.section-label:contains("AddExistingParts")').hide();
-    $('#addExistingDataTable').hide();
+$(document).ready(function() {
+    loadPartControlTable();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const objectid = urlParams.get('name');
-
-    if (!objectid) {
-        $('#errorMessage').text('Missing object ID.');
-        return;
-    }
-
-    $.ajax({
-        url: 'http://localhost:8080/andromeda/api/datafetchservice/getaddexisting',
-        data: { objectid: objectid },
-        dataType: 'json',
-        cache: false,
-        success: function(data) {
-            $('#errorMessage').text('');
-            if (!data || !Array.isArray(data) || data.length === 0 || data.message) {
-                $('#errorMessage').text(data ? data.message || 'No part Connection data found.' : 'Error loading data.');
-                if ($.fn.DataTable.isDataTable('#addExistingDataTable')) {
-                    $('#addExistingDataTable').DataTable().clear().destroy();
-                }
-                $('.section-label:contains("AddExistingParts")').hide();
-                $('#addExistingDataTable').hide();
-                return;
-            }
-
-            $('.section-label:contains("AddExistingParts")').show();
-            $('#addExistingDataTable').show();
-
-            const excludedFields = ['connectionid'];
-            const columns = Object.keys(data[0])
-                .filter(key => !excludedFields.includes(key))
-                .map(key => ({
-                    data: key,
-                    title: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')
-                }));
-
-            if ($.fn.DataTable.isDataTable('#addExistingDataTable')) {
-                $('#addExistingDataTable').DataTable().clear().destroy();
-            }
-
-            const thead = $('#addExistingDataTable thead');
-            thead.empty();
-            const headerRow = $('<tr></tr>');
-            columns.forEach(col => {
-                headerRow.append(`<th>${col.title}</th>`);
-            });
-            thead.append(headerRow);
-
-            $('#addExistingDataTable').DataTable({
-                data: data,
-                columns: columns,
-                order: [[columns.findIndex(c => c.data === 'createddate') || 0, 'desc']],
-                paging: false,
-                searching: false,
-                scrollX: true,
-                info: false,
-                destroy: true
-            });
-        },
-        error: function(xhr, status, error) {
-            console.error('AJAX error:', status, error);
-            $('#errorMessage').text('Failed to load part connections.');
-            $('.section-label:contains("AddExistingParts")').hide();
-            $('#addExistingDataTable').hide();
-        }
-    });
-}
-    $(document).ready(function() {
-        loadPartSpecificationTable();
-        loadAddExistingPartTable();
-        const partInfo = JSON.parse(sessionStorage.getItem('partInfo'));
-        if (partInfo) {
-            $('.part-number').text(partInfo.name || '');
-            $('.part-type').text(partInfo.type || '');
-            const icon = (partInfo.type && partInfo.type.toLowerCase() === 'fastener') 
-                ? 'https://img.icons8.com/?size=50&id=20544&format=png&color=000000' 
-                : 'https://img.icons8.com/?size=50&id=OCre7GSjDUBi&format=png&color=000000';
-
-            $('#typeIcon').attr('src', icon);
-            $('.state-box .state-label').remove();
-            if (partInfo.currentstate) {
-        	    $('.state-box .state-label').remove();
-        	    const state = partInfo.currentstate;
-        	    const badge = $('<span>')
-        	        .addClass('state-badge ' + state.replace(/\s/g, ''))
-        	        .text(state);
-        	    $('<span>')
-        	        .addClass('state-label')
-        	        .text('State: ')
-        	        .append(badge)
-        	        .prependTo('.state-box');
-        	}
-        } else {
-            $('.part-number').text('');
-            $('.part-type').text('');
-            $('#typeIcon').attr('src', 'https://img.icons8.com/?size=50&id=OCre7GSjDUBi&format=png&color=000000');
-            $('.state-box .state-label').remove();
-        }
-        document.getElementById('openCreatePanelBtn').addEventListener('click', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const objectid = urlParams.get('name');
-
-            if (objectid) {
-                const panel = document.getElementById('createPanel');
-                panel.classList.add('active');
-                document.getElementById('createIframe').src = 'PartSpecificationwithconnection.jsp?name=' + encodeURIComponent(objectid);
-            } else {
-                alert('No object ID found!');
-            }
-        });
-    });
-    
-    $('#addExistingpart').on('click', function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const objectid = urlParams.get('name');
-
-        if (objectid) {
-            const targetUrl = 'search.jsp?name=' + encodeURIComponent(objectid);
-            window.open(targetUrl,'AddExistingPartPopup','width=900,height=800, position=center,left=100,top=100,resizable=yes' );
-        } else {
-            alert('No object ID found!');
-        }
-    });
-
-    window.addEventListener('message', function(event) {
-        if (!event.data) return;
-
-        if (event.data.action === 'closeOnly') {
-            document.getElementById('createPanel').classList.remove('active');
-        } else if (event.data.action === 'closeAndRefresh') {
-            document.getElementById('createPanel').classList.remove('active');
-            loadPartSpecificationTable();
-        } else if (event.data && event.data.selectedParts) {
-            receiveSelectedParts(event.data.selectedParts);
-        }
-    });
-
-    function closeCreatePanel() {
+    document.getElementById('openCreatePanelBtn').addEventListener('click', function () {
         const panel = document.getElementById('createPanel');
-        panel.classList.remove('active');
-        document.getElementById('createIframe').src = '';
+        panel.classList.add('active');
+        document.getElementById('createIframe').src = 'CreatePartSpecification.jsp';
+    });
+
+    $('#addExistingpart').on('click', function () {
+        const targetUrl = 'search.jsp';
+        window.open(targetUrl, 'AddExistingPartPopup', 'width=900,height=800,left=100,top=100,resizable=yes');
+    });
+});
+
+window.addEventListener('message', function (event) {
+    const action = event.data?.action;
+    const createPanel = document.getElementById('createPanel');
+
+    if (!createPanel) return;
+
+    if (action === 'closeOnly') {
+        createPanel.classList.remove('active');
     }
+
+    if (action === 'closeAndRefresh') {
+    	  createPanel.classList.remove('active');
+    	  const createdPartId = event.data?.createdPartId;
+    	  if (createdPartId) {
+    	    window.location.href = 'Properties.jsp?name=' + encodeURIComponent(createdPartId);
+    	  } else {
+    	    loadPartControlTable();
+    	  }
+    	}
+});
+function closeCreatePanel() {
+    const panel = document.getElementById('createPanel');
+    panel.classList.remove('active');
+    document.getElementById('createIframe').src = '';
+}
 </script>
 </body>
 </html>
